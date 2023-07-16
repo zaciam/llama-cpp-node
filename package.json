@@ -1,6 +1,6 @@
 {
   "name": "llama-cpp-node",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node.js addon to use llama.cpp",
   "main": "./build/Release/llama.cpp.node",
   "scripts": {
