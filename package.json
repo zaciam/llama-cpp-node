@@ -14,7 +14,7 @@
     "install": "npm run download && npm run extract && npm run configure && npm run build",
     "pretest": "npm run build",
     "test": "node test.js",
-    "demo": "node demo.js",
+    "demo": "node demo.js"
   },
   "author": "zaciam",
   "license": "MIT",
