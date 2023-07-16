@@ -197,8 +197,8 @@ This method takes a `Uint32Array` of tokens and decodes them back into a string.
 
 ## Contributing
 
-Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue on the [GitHub repository](https://github.com/zaciam/llama-cpp-binding).
+Contributions are welcome! If you have any suggestions, bug reports, or feature requests, please open an issue on the [GitHub repository](https://github.com/zaciam/llama-cpp-node).
 
 ## License
 
-This module is released under the [MIT License](https://opensource.org/licenses/MIT). See the [LICENSE](https://github.com/zaciam/llama-cpp-binding/LICENSE) file for more details.
+This module is released under the [MIT License](https://opensource.org/licenses/MIT). See the [LICENSE](https://github.com/zaciam/llama-cpp-node/blob/master/LICENSE) file for more details.

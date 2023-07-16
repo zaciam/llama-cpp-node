@@ -21,7 +21,6 @@
   "gypfile": true,
   "dependencies": {
     "7zip": "^0.0.6",
-    "nan": "^2.17.0",
     "node-addon-api": "^6.1.0"
   },
   "devDependencies": {
