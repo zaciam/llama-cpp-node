@@ -1,0 +1,38 @@
+{
+  "name": "llama-cpp-node",
+  "version": "1.0.0",
+  "description": "Node.js addon to use llama.cpp",
+  "main": "./build/Release/llama.cpp.node",
+  "scripts": {
+    "configure": "node-gyp configure --verbose && npm -s run compile_commands_json",
+    "compile_commands_json": "node-gyp configure -- -f compile_commands_json && ((move /Y Release\\compile_commands.json compile_commands.json && rd Release) || (mv Debug/compile_commands.json compile_commands.json && rm -r Debug))",
+    "build": "node-gyp build -j max",
+    "clean": "node-gyp clean",
+    "get-url": "node -e \"require('https').get((b='https://github.com/ggerganov/llama.cpp/')+'releases/latest',(t)=>{console.log(b+'archive/refs/tags/'+t.headers.location.replace(/.*tag./,''));t.destroy();});\">download/url.txt",
+    "download": "(mkdir download || echo ok) && npm run get-url && set /p URL=<download/url.txt && (call curl -s -L -o download/llama.cpp.zip ^%URL^%.zip || curl -s -L -o download/llama.cpp.tar.gz \"$(cat download/url.txt).tar.gz\")",
+    "extract": "((rd /s /q llama.cpp || echo ok) && (node_modules\\7zip\\7zip-lite\\7z.exe x -y -odownload download/llama.cpp.zip) && (move download\\llama.cpp-* llama.cpp) && rd /s /q download) || ((rm -rf llama.cpp || echo ok) && tar -x -C download -f download/llama.cpp.tar.gz && mv download/llama.cpp-* llama.cpp)",
+    "install": "npm run download && npm run extract && npm run configure && npm run build",
+    "pretest": "npm run build",
+    "test": "node test.js",
+    "demo": "node demo.js",
+  },
+  "author": "zaciam",
+  "license": "MIT",
+  "gypfile": true,
+  "dependencies": {
+    "7zip": "^0.0.6",
+    "nan": "^2.17.0",
+    "node-addon-api": "^6.1.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^9.3.1"
+  },
+  "homepage": "https://github.com/zaciam/llama-cpp-node",
+  "bugs": {
+    "url": "https://github.com/zaciam/llama-cpp-node/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zaciam/llama-cpp-node"
+  }
+}

@@ -128,3 +128,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+download/
+llama.cpp/
+build/
+.vscode/
+compile_commands.json
+package-lock.json
