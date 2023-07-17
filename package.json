@@ -1,6 +1,6 @@
 {
   "name": "llama-cpp-node",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Node.js addon to use llama.cpp",
   "main": "./build/Release/llama.cpp.node",
   "scripts": {
@@ -19,12 +19,10 @@
   "author": "zaciam",
   "license": "MIT",
   "gypfile": true,
-  "dependencies": {
-    "7zip": "^0.0.6",
-    "node-addon-api": "^6.1.0"
-  },
   "devDependencies": {
-    "node-gyp": "^9.3.1"
+    "node-gyp": "*",
+    "7zip": "*",
+    "node-addon-api": "*"
   },
   "homepage": "https://github.com/zaciam/llama-cpp-node",
   "bugs": {
