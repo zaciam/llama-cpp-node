@@ -1,6 +1,6 @@
 {
   "name": "llama-cpp-node",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Node.js addon to use llama.cpp",
   "main": "./build/Release/llama.cpp.node",
   "scripts": {
@@ -13,7 +13,7 @@
     "extract": "((rd /s /q llama.cpp || echo ok) && (npx 7z x -y -odownload download/llama.cpp.zip) && (move download\\llama.cpp-* llama.cpp) && rd /s /q download) || ((rm -rf llama.cpp || echo ok) && tar -x -C download -f download/llama.cpp.tar.gz && mv download/llama.cpp-* llama.cpp)",
     "install": "npm run download && npm run extract && npm run configure && npm run build",
     "pretest": "npm run build",
-    "test": "node test.js",
+    "test": "node --test",
     "demo": "node demo.js"
   },
   "author": "zaciam",
