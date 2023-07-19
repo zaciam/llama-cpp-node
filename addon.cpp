@@ -10,8 +10,13 @@ class LLAMAModel : public Napi::ObjectWrap<LLAMAModel> {
   LLAMAModel(const Napi::CallbackInfo& info) : Napi::ObjectWrap<LLAMAModel>(info) {
     params = llama_context_default_params();
     params.seed = -1;
-    params.n_ctx = 2048;
+    params.n_ctx = 4096;
     model = llama_load_model_from_file(info[0].As<Napi::String>().Utf8Value().c_str(), params);
+
+    if (model == NULL) {
+      Napi::Error::New(info.Env(), "Failed to load model").ThrowAsJavaScriptException();
+      return;
+    }
   }
   ~LLAMAModel() { llama_free_model(model); }
   static void init(Napi::Object exports) { exports.Set("LLAMAModel", DefineClass(exports.Env(), "LLAMAModel", {})); }
@@ -21,12 +26,14 @@ class LLAMAContext : public Napi::ObjectWrap<LLAMAContext> {
   public:
   LLAMAModel* model;
   llama_context* ctx;
-  LLAMAContext(const Napi::CallbackInfo& callbackInfo) : Napi::ObjectWrap<LLAMAContext>(callbackInfo) {
-    model = Napi::ObjectWrap<LLAMAModel>::Unwrap(callbackInfo[0].As<Napi::Object>());
+  LLAMAContext(const Napi::CallbackInfo& info) : Napi::ObjectWrap<LLAMAContext>(info) {
+    model = Napi::ObjectWrap<LLAMAModel>::Unwrap(info[0].As<Napi::Object>());
     model->Ref();
     ctx = llama_new_context_with_model(model->model, model->params);
+    Napi::MemoryManagement::AdjustExternalMemory(Env(), llama_get_state_size(ctx));
   }
   ~LLAMAContext() {
+    Napi::MemoryManagement::AdjustExternalMemory(Env(), -(int64_t)llama_get_state_size(ctx));
     llama_free(ctx);
     model->Unref();
   }
