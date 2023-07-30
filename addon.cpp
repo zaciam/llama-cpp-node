@@ -1,4 +1,7 @@
+#include <stddef.h>
+#include <algorithm>
 #include <sstream>
+#include <vector>
 
 #include "llama.h"
 #include "napi.h"
@@ -88,15 +91,23 @@ class LLAMAContext : public Napi::ObjectWrap<LLAMAContext> {
 
 class LLAMAContextEvalWorker : Napi::AsyncWorker, Napi::Promise::Deferred {
   LLAMAContext* ctx;
-  std::vector<llama_token> tokenList;
+  std::vector<llama_token> tokens;
+  std::vector<llama_token> restriction;
   llama_token result;
 
   public:
   LLAMAContextEvalWorker(const Napi::CallbackInfo& info, LLAMAContext* ctx) : Napi::AsyncWorker(info.Env(), "LLAMAContextEvalWorker"), ctx(ctx), Napi::Promise::Deferred(info.Env()) {
     ctx->Ref();
     Napi::Uint32Array tokens = info[0].As<Napi::Uint32Array>();
-    tokenList.reserve(tokens.ElementLength());
-    for (size_t i = 0; i < tokens.ElementLength(); i++) { tokenList.push_back(static_cast<llama_token>(tokens[i])); }
+    this->tokens.reserve(tokens.ElementLength());
+    for (size_t i = 0; i < tokens.ElementLength(); i++) { this->tokens.push_back(static_cast<llama_token>(tokens[i])); }
+
+    if (info.Length() > 1 && info[1].IsTypedArray()) {
+      Napi::Uint32Array restriction = info[1].As<Napi::Uint32Array>();
+      this->restriction.reserve(restriction.ElementLength());
+      for (size_t i = 0; i < restriction.ElementLength(); i++) { this->restriction.push_back(static_cast<llama_token>(restriction[i])); }
+      std::sort(this->restriction.begin(), this->restriction.end());
+    }
   }
   ~LLAMAContextEvalWorker() { ctx->Unref(); }
   using Napi::AsyncWorker::Queue;
@@ -105,20 +116,39 @@ class LLAMAContextEvalWorker : Napi::AsyncWorker, Napi::Promise::Deferred {
   protected:
   void Execute() {
     // Perform the evaluation using llama_eval.
-    int re = llama_eval(ctx->ctx, tokenList.data(), tokenList.size(), llama_get_kv_cache_token_count(ctx->ctx), 6);
-    if (re != 0) {
+    int r = llama_eval(ctx->ctx, tokens.data(), tokens.size(), llama_get_kv_cache_token_count(ctx->ctx), 6);
+    if (r != 0) {
       SetError("Eval has failed");
       return;
     }
 
     // Select the best prediction.
-    std::vector<llama_token_data> candidates;
-    int n_vocab = llama_n_vocab(ctx->ctx);
-    candidates.reserve(n_vocab);
     float* logits = llama_get_logits(ctx->ctx);
-    for (llama_token id = 0; id < n_vocab; id++) { candidates.emplace_back(llama_token_data { id, logits[id], 0.0f }); }
-    llama_token_data_array candidates_p = { candidates.data(), candidates.size(), false };
-    result = llama_sample_token_greedy(ctx->ctx, &candidates_p);
+    int n_vocab = llama_n_vocab(ctx->ctx);
+    llama_token re;
+    if (restriction.empty()) {
+      float max = logits[0];
+      re = 0;
+      for (llama_token id = 1; id < n_vocab; id++) {
+        float logit = logits[id];
+        if (logit > max) {
+          max = logit;
+          re = id;
+        }
+      }
+    } else {
+      float max = logits[restriction[0]];
+      re = 0;
+      for (size_t i = 1; i < restriction.size(); i++) {
+        llama_token id = restriction[i];
+        float logit = logits[id];
+        if (logit > max) {
+          max = logit;
+          re = id;
+        }
+      }
+    }
+    result = re;
   }
   void OnOK() { Napi::Promise::Deferred::Resolve(Napi::Number::New(Napi::AsyncWorker::Env(), (uint32_t)result)); }
   void OnError(const Napi::Error& err) { Napi::Promise::Deferred::Reject(err.Value()); }

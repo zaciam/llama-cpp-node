@@ -2,7 +2,7 @@ var llamaCppNode = require('..');
 var { LLAMAModel, LLAMAContext } = llamaCppNode;
 var test = require('node:test');
 var assert = require('node:assert');
-var { download } = require('../test-utils.js');
+var { download } = require('../utils-test.js');
 var model = null;
 var ctx = null;
 

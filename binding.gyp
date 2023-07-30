@@ -5,6 +5,7 @@
       "sources": [
         "addon.cpp",
         "llama.cpp/ggml.c",
+        "llama.cpp/ggml-alloc.c",
         "llama.cpp/k_quants.c",
         "llama.cpp/llama.cpp"
       ],
