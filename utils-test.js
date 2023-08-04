@@ -5,10 +5,10 @@ var model = null;
 var download = async () => {
     try {
         fs.mkdirSync('models');
+        if (fs.statSync('models/Wizard-Vicuna-7B-Uncensored.ggmlv3.q4_K_S.bin').size == 3791725184) {
+            return;
+        }
     } catch { }
-    if (fs.statSync('models/Wizard-Vicuna-7B-Uncensored.ggmlv3.q4_K_S.bin').size == 3791725184) {
-        return;
-    }
     var exitCode = await new Promise((f, r) => {
         var p = child_process.spawn('curl', [
             '-L',
