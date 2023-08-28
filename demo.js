@@ -1,5 +1,4 @@
 var llamaCppNode = require('.');
-var { LLAMAModel, LLAMAContext } = llamaCppNode;
 var readline = require('readline/promises');
 
 // Print some system info.
@@ -8,7 +7,7 @@ console.log(llamaCppNode.systemInfo());
 // Load the model and create a context.
 var model = new LLAMAModel('C:/models/13B/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_0.bin');
 
-var ctx = new LLAMAContext(model);
+var ctx = model.createContext();
 
 // Specify the initial prompt and encode it as tokens.
 var prompt = 'You are a 25 old human named ASSISTANT. It follows a transcript between you and your wife named USER.\nASSISTANT:';
@@ -16,7 +15,7 @@ var tokens = ctx.encode(prompt);
 
 // Add a BOS token at the beginning of the tokens.
 tokens = Array.from(tokens);
-tokens.unshift(llamaCppNode.tokenBos());
+tokens.unshift(ctx.tokenBos());
 tokens = Uint32Array.from(tokens);
 
 // Create a readline interface to communicate with the user.
@@ -36,7 +35,7 @@ interact = async () => {
     var nextToken = await ctx.eval(tokens);
 
     // Handle EOS as switch between assistant to user.
-    if (nextToken === llamaCppNode.tokenEos()) {
+    if (nextToken === ctx.tokenEos()) {
       // Fixup the reverse prompt.
       tokenStr = '\nUSER: '
       process.stdout.write(tokenStr);

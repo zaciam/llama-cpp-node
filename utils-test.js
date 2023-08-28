@@ -5,6 +5,8 @@ var model = null;
 var download = async () => {
     try {
         fs.mkdirSync('models');
+    } catch { }
+    try {
         if (fs.statSync('models/Wizard-Vicuna-7B-Uncensored.ggmlv3.q4_K_S.bin').size == 3791725184) {
             return;
         }

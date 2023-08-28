@@ -34,8 +34,8 @@ Before you can use llama-cpp-node, you need to load a model file and create a co
 The model file should be in the ggml format.
 
 ```javascript
-var model = new LLAMAModel('C:/models/13B/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_0.bin');
-var ctx = new LLAMAContext(model);
+var model = llamaCppNode.createModel('C:/models/13B/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_0.bin');
+var ctx = model.createContext();
 ```
 
 ### Encoding Strings into Tokens
@@ -76,9 +76,9 @@ var readline = require('readline/promises');
 console.log(llamaCppNode.systemInfo());
 
 // Load the model and create a context.
-var model = new LLAMAModel('C:/models/13B/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_0.bin');
+var model = llamaCppNode.createModel('C:/models/13B/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_0.bin');
 
-var ctx = new LLAMAContext(model);
+var ctx = model.createContext();
 
 // Specify the initial prompt and encode it as tokens.
 var prompt = 'You are a 25 old human named ASSISTANT. It follows a transcript between you and your wife named USER.\nASSISTANT:';
@@ -175,11 +175,11 @@ Make sure to replace `C:/models/13B/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_0.bin
 
 This function returns information about the system where llama-cpp-node is running, such as the CPU and GPU information.
 
-### `new LLAMAModel(modelPath: string)`
+### `llamaCppNode.createModel(modelPath: string): LLAMAModel`
 
 This class represents a llama model. It takes the path to the model file as a parameter and can be used to create a context.
 
-### `new LLAMAContext(model: LLAMAModel)`
+### `model.createContext(): LLAMAContext`
 
 This class represents a context for the llama model. It takes a model instance as a parameter and can be used to encode, evaluate, and decode tokens.
 

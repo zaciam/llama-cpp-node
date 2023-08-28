@@ -131,7 +131,8 @@ dist
 
 
 download/
-llama.cpp/
+llama.cpp_ggml/
+llama.cpp_gguf/
 build/
 .vscode/
 compile_commands.json

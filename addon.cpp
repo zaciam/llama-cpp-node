@@ -1,4 +1,5 @@
 #include <stddef.h>
+
 #include <algorithm>
 #include <sstream>
 #include <vector>
@@ -24,6 +25,12 @@ class LLAMAModel : public Napi::ObjectWrap<LLAMAModel> {
   ~LLAMAModel() { llama_free_model(model); }
   static void init(Napi::Object exports) { exports.Set("LLAMAModel", DefineClass(exports.Env(), "LLAMAModel", {})); }
 };
+
+template<typename ReType, typename... Args> constexpr auto nargs(ReType (*)(Args...)) noexcept { return sizeof...(Args); }
+template<class F, F* f> typename std::enable_if<nargs(f) == 1, bool>::type call(llama_context* ctx) { return f(ctx); }
+template<class F, F* f> typename std::enable_if<nargs(f) == 0, bool>::type call(llama_context* ctx) { return f(); }
+template<typename T> auto token_to_str(T ctx, llama_token token) -> decltype(llama_token_to_str(ctx, token)) { return llama_token_to_str(ctx, token); }
+template<typename T> auto token_to_str(T ctx, llama_token token) -> decltype(llama_token_get_text(ctx, token)) { return llama_token_get_text(ctx, token); }
 
 class LLAMAContext : public Napi::ObjectWrap<LLAMAContext> {
   public:
@@ -65,7 +72,7 @@ class LLAMAContext : public Napi::ObjectWrap<LLAMAContext> {
 
     // Decode each token and accumulate the result.
     for (size_t i = 0; i < tokens.ElementLength(); i++) {
-      const char* str = llama_token_to_str(ctx, (llama_token)tokens[i]);
+      const char* str = token_to_str(ctx, (llama_token)tokens[i]);
       if (str == nullptr) {
         Napi::Error::New(info.Env(), "Invalid token").ThrowAsJavaScriptException();
         return info.Env().Undefined();
@@ -76,6 +83,8 @@ class LLAMAContext : public Napi::ObjectWrap<LLAMAContext> {
     return Napi::String::New(info.Env(), ss.str());
   }
   Napi::Value Eval(const Napi::CallbackInfo& info);
+  Napi::Value TokenBos(const Napi::CallbackInfo& info) { return Napi::Number::From(info.Env(), call<decltype(llama_token_bos), llama_token_bos>(ctx)); }
+  Napi::Value TokenEos(const Napi::CallbackInfo& info) { return Napi::Number::From(info.Env(), call<decltype(llama_token_eos), llama_token_eos>(ctx)); }
   static void init(Napi::Object exports) {
     exports.Set("LLAMAContext",
         DefineClass(exports.Env(),
@@ -84,6 +93,8 @@ class LLAMAContext : public Napi::ObjectWrap<LLAMAContext> {
                 InstanceMethod("encode", &LLAMAContext::Encode),
                 InstanceMethod("decode", &LLAMAContext::Decode),
                 InstanceMethod("eval", &LLAMAContext::Eval),
+                InstanceMethod("tokenBos", &LLAMAContext::TokenBos),
+                InstanceMethod("tokenEos", &LLAMAContext::TokenEos),
             }));
   }
 };
@@ -160,15 +171,11 @@ Napi::Value LLAMAContext::Eval(const Napi::CallbackInfo& info) {
   return worker->Promise();
 }
 
-Napi::Value tokenBos(const Napi::CallbackInfo& info) { return Napi::Number::From(info.Env(), llama_token_bos()); }
-Napi::Value tokenEos(const Napi::CallbackInfo& info) { return Napi::Number::From(info.Env(), llama_token_eos()); }
 Napi::Value systemInfo(const Napi::CallbackInfo& info) { return Napi::String::From(info.Env(), llama_print_system_info()); }
 
 Napi::Object registerCallback(Napi::Env env, Napi::Object exports) {
   llama_backend_init(false);
   exports.DefineProperties({
-      Napi::PropertyDescriptor::Function("tokenBos", tokenBos),
-      Napi::PropertyDescriptor::Function("tokenEos", tokenEos),
       Napi::PropertyDescriptor::Function("systemInfo", systemInfo),
   });
   LLAMAModel::init(exports);
