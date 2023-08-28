@@ -1,6 +1,6 @@
 {
   "name": "llama-cpp-node",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Node.js addon to use llama.cpp",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "download-ggml": "(mkdir download || echo ok) && (set URL=https://github.com/ggerganov/llama.cpp/archive/refs/tags/master-9e232f0.zip && call curl -s -L -o download/llama.cpp_ggml.zip ^%URL^%.zip  || call echo ok) || (curl -s -L -o download/llama.cpp_ggml.tar.gz \"https://github.com/ggerganov/llama.cpp/archive/refs/tags/master-9e232f0.tar.gz\")",
     "extract-ggml": "((rd /s /q llama.cpp_ggml || echo ok) && (powershell -command \"Expand-Archive download/llama.cpp_ggml.zip -DestinationPath download\") && (del download\\llama.cpp_ggml.zip) && (move download\\llama.cpp-* llama.cpp_ggml)) || ((rm -rf llama.cpp_ggml || echo ok) && tar -x -C download -f download/llama.cpp_ggml.tar.gz && mv download/llama.cpp-* llama.cpp_ggml)",
     "extract-gguf": "((rd /s /q llama.cpp_gguf || echo ok) && (powershell -command \"Expand-Archive download/llama.cpp_gguf.zip -DestinationPath download\") && (del download\\llama.cpp_gguf.zip) && (move download\\llama.cpp-* llama.cpp_gguf)) || ((rm -rf llama.cpp_gguf || echo ok) && tar -x -C download -f download/llama.cpp_gguf.tar.gz && mv download/llama.cpp-* llama.cpp_gguf)",
+    "preinstall": "npm i node-addon-api",
     "install": "npm run download-ggml && npm run download-gguf && npm run extract-ggml && npm run extract-gguf && npm run configure && npm run build",
     "pretest": "npm run build",
     "test": "node --test",
@@ -23,7 +24,7 @@
   "author": "zaciam",
   "license": "MIT",
   "gypfile": true,
-  "devDependencies": {
+  "dependencies": {
     "node-addon-api": "*",
     "node-gyp": "*"
   },
